@@ -134,11 +134,11 @@ branching, PR reviews, and code collaboration.
 
 ```md
 
-## 📌 Project Overview
+# 📌 Project Overview
 
-## InternFlow – Internship & Task Management System
+# InternFlow – Internship & Task Management System
 
-## Problem It Solves:
+# Problem It Solves:
 
 Managing large batches of interns manually using WhatsApp and Excel leads to poor
 attendance tracking, missed task submissions, no performance visibility, and manual
@@ -176,25 +176,6 @@ Used internally by BPH Technologies and IT companies for internship management
 - Responsive UI
 
 ---
-
-## 📂 Folder Structure
-```
-client/
-  ├── src/
-  │   ├── components/
-  │   ├── pages/
-  │   ├── services/
-  │   ├── context/
-  │   └── App.js
-
-server/
-  ├── controllers/
-  ├── models/
-  ├── routes/
-  ├── middleware/
-  ├── config/
-  └── server.js
-```
 
 ---
 
