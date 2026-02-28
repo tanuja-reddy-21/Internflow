@@ -1,0 +1,1022 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Internship Management System — LLD Architecture</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Syne:wght@400;600;700;800&display=swap');
+
+  :root {
+    --bg: #0a0e1a;
+    --surface: #111827;
+    --card: #161d2e;
+    --border: #1e2d45;
+    --border-bright: #2a4060;
+
+    --react: #61dafb;
+    --express: #68d391;
+    --mongo: #4db33d;
+    --jwt: #f6ad55;
+    --admin: #fc8181;
+    --intern: #76e4f7;
+    --service: #b794f4;
+    --muted: #4a5568;
+    --text: #e2e8f0;
+    --text-dim: #718096;
+    --accent: #4299e1;
+    --danger: #fc8181;
+    --success: #68d391;
+    --warning: #f6ad55;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'JetBrains Mono', monospace;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: auto;
+  }
+
+  .page {
+    padding: 32px 40px 60px;
+    min-width: 1400px;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    text-align: center;
+    margin-bottom: 40px;
+    position: relative;
+  }
+  .header::after {
+    content: '';
+    display: block;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border-bright), transparent);
+    margin-top: 24px;
+  }
+  .badge {
+    display: inline-block;
+    background: rgba(66,153,225,0.12);
+    border: 1px solid rgba(66,153,225,0.35);
+    color: var(--accent);
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    padding: 4px 14px;
+    border-radius: 2px;
+    margin-bottom: 14px;
+  }
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: 32px;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -0.5px;
+  }
+  .subtitle {
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-top: 8px;
+    letter-spacing: 1px;
+  }
+
+  /* ── GRID ── */
+  .arch-grid {
+    display: grid;
+    grid-template-columns: 280px 1fr 280px;
+    gap: 20px;
+    align-items: start;
+  }
+
+  /* ── PANELS ── */
+  .panel {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .panel-header {
+    padding: 10px 14px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .panel-body { padding: 12px 14px; }
+
+  /* ── LAYER COLORS ── */
+  .layer-react { border-color: rgba(97,218,251,0.3); }
+  .layer-react .panel-header { background: rgba(97,218,251,0.1); color: var(--react); }
+
+  .layer-express { border-color: rgba(104,211,145,0.3); }
+  .layer-express .panel-header { background: rgba(104,211,145,0.1); color: var(--express); }
+
+  .layer-mongo { border-color: rgba(77,179,61,0.3); }
+  .layer-mongo .panel-header { background: rgba(77,179,61,0.1); color: var(--mongo); }
+
+  .layer-jwt { border-color: rgba(246,173,85,0.3); }
+  .layer-jwt .panel-header { background: rgba(246,173,85,0.1); color: var(--jwt); }
+
+  .layer-service { border-color: rgba(183,148,244,0.3); }
+  .layer-service .panel-header { background: rgba(183,148,244,0.1); color: var(--service); }
+
+  /* ── DOT ── */
+  .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* ── COMPONENT BLOCK ── */
+  .comp {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 8px 10px;
+    margin-bottom: 8px;
+    font-size: 11px;
+  }
+  .comp:last-child { margin-bottom: 0; }
+  .comp-title {
+    font-weight: 600;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .comp-detail {
+    color: var(--text-dim);
+    font-size: 10px;
+    line-height: 1.6;
+  }
+
+  /* ── API TAG ── */
+  .api-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 2px 7px;
+    border-radius: 3px;
+    font-size: 9.5px;
+    font-weight: 600;
+    margin: 2px 2px 2px 0;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .method {
+    font-size: 8px;
+    font-weight: 700;
+    padding: 1px 4px;
+    border-radius: 2px;
+  }
+  .post { background: rgba(104,211,145,0.2); color: var(--success); }
+  .get  { background: rgba(66,153,225,0.2);  color: var(--accent); }
+  .put  { background: rgba(246,173,85,0.2);  color: var(--warning); }
+  .del  { background: rgba(252,129,129,0.2); color: var(--danger); }
+
+  .api-tag { background: var(--bg); border: 1px solid var(--border); color: var(--text-dim); }
+
+  /* ── SCHEMA ── */
+  .schema {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 10px 12px;
+    margin-bottom: 10px;
+    font-size: 10px;
+  }
+  .schema-title {
+    color: var(--mongo);
+    font-weight: 700;
+    font-size: 11px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .schema-title::before {
+    content: '⬡';
+    font-size: 13px;
+  }
+  .field { color: var(--text-dim); line-height: 1.8; }
+  .field span { color: var(--text); }
+  .field em { color: var(--accent); font-style: normal; }
+
+  /* ── MIDDLEWARE CHAIN ── */
+  .mw-chain {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    position: relative;
+    padding-left: 20px;
+  }
+  .mw-chain::before {
+    content: '';
+    position: absolute;
+    left: 8px; top: 10px; bottom: 10px;
+    width: 2px;
+    background: linear-gradient(180deg, var(--jwt), var(--express), var(--service));
+    border-radius: 2px;
+  }
+  .mw-step {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 7px 10px;
+    font-size: 10px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .mw-step::before {
+    content: '';
+    position: absolute;
+    left: -13px;
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--border-bright);
+    border: 2px solid var(--bg);
+  }
+  .mw-num {
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: var(--border);
+    font-size: 9px;
+    font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+
+  /* ── ROLE FLOW ── */
+  .role-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  .role-badge {
+    padding: 3px 10px;
+    border-radius: 3px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+  }
+  .role-admin { background: rgba(252,129,129,0.15); color: var(--admin); border: 1px solid rgba(252,129,129,0.3); }
+  .role-intern { background: rgba(118,228,247,0.1); color: var(--intern); border: 1px solid rgba(118,228,247,0.3); }
+
+  /* ── ARROW ── */
+  .arrow-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    padding: 0 10px;
+  }
+  .arrow-label {
+    font-size: 9px;
+    color: var(--text-dim);
+    text-align: center;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .arrow {
+    font-size: 18px;
+    color: var(--border-bright);
+  }
+
+  /* ── CENTER COLUMN ── */
+  .center-col {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  /* ── FLOW ROW ── */
+  .flow-row {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr auto 1fr;
+    gap: 0;
+    align-items: center;
+  }
+  .flow-arrow {
+    padding: 0 8px;
+    color: var(--border-bright);
+    font-size: 16px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+  .flow-arrow.bidirectional { font-size: 12px; }
+
+  /* ── HORIZONTAL LAYERS ── */
+  .h-layer {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 4px;
+  }
+
+  .layer-box {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 10px 12px;
+    font-size: 10px;
+  }
+  .layer-box-title {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--border);
+  }
+  .item {
+    color: var(--text-dim);
+    padding: 3px 0;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 10px;
+  }
+  .item::before { content: '›'; color: var(--border-bright); }
+
+  /* ── DATA FLOW DIAGRAM ── */
+  .dataflow {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .df-col {
+    flex: 1;
+    padding: 12px;
+    border-right: 1px solid var(--border);
+    font-size: 10px;
+  }
+  .df-col:last-child { border-right: none; }
+  .df-title {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    padding-bottom: 6px;
+    border-bottom: 1px dashed var(--border);
+  }
+  .df-step {
+    background: var(--surface);
+    border-radius: 3px;
+    padding: 5px 8px;
+    margin-bottom: 5px;
+    color: var(--text-dim);
+    font-size: 9.5px;
+    position: relative;
+  }
+
+  /* ── SECTION LABEL ── */
+  .section-label {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin: 20px 0 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* ── LEGEND ── */
+  .legend {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-top: 32px;
+    padding: 14px 18px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    font-size: 10px;
+  }
+  .legend-item { display: flex; align-items: center; gap: 6px; color: var(--text-dim); }
+  .legend-dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+
+  /* ── PERFORMANCE CALC ── */
+  .calc-box {
+    background: var(--bg);
+    border: 1px solid rgba(183,148,244,0.2);
+    border-radius: 4px;
+    padding: 10px 12px;
+    font-size: 10px;
+    margin-bottom: 8px;
+  }
+  .calc-title { color: var(--service); font-weight: 600; margin-bottom: 6px; }
+  .calc-formula { color: var(--text-dim); font-size: 9.5px; line-height: 1.8; }
+  .calc-formula strong { color: var(--warning); }
+
+  /* ── FOLDER TREE ── */
+  .tree { font-size: 10px; line-height: 2; color: var(--text-dim); }
+  .tree-dir { color: var(--accent); }
+  .tree-file { color: var(--text-dim); }
+  .tree-hl { color: var(--success); }
+
+  /* ── RELATIONSHIP LINE ── */
+  .rel {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 10px;
+    color: var(--text-dim);
+    padding: 4px 0;
+  }
+  .rel-line {
+    flex: 1;
+    height: 1px;
+    background: repeating-linear-gradient(90deg, var(--border) 0, var(--border) 4px, transparent 4px, transparent 8px);
+  }
+  .rel-label { color: var(--text-dim); font-size: 9px; letter-spacing: 1px; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="badge">Low Level Design · Architecture Diagram</div>
+    <h1>Internship Management System</h1>
+    <div class="subtitle">MERN Stack · JWT Auth · Role-Based Access Control · REST API Architecture</div>
+  </div>
+
+  <!-- MAIN 3-COLUMN GRID -->
+  <div class="arch-grid">
+
+    <!-- ════════════ LEFT: FRONTEND ════════════ -->
+    <div style="display:flex;flex-direction:column;gap:14px;">
+
+      <div class="panel layer-react">
+        <div class="panel-header">
+          <div class="dot" style="background:var(--react)"></div>
+          React.js Frontend
+        </div>
+        <div class="panel-body">
+
+          <div class="comp">
+            <div class="comp-title" style="color:var(--jwt)">🔐 Auth Pages</div>
+            <div class="comp-detail">
+              Login.jsx<br>
+              Register.jsx<br>
+              ProtectedRoute.jsx<br>
+              <span style="color:var(--text-dim)">→ stores JWT in localStorage</span>
+            </div>
+          </div>
+
+          <div class="comp">
+            <div class="comp-title" style="color:var(--intern)">🎓 Intern Dashboard</div>
+            <div class="comp-detail">
+              Dashboard.jsx<br>
+              TaskList.jsx<br>
+              SubmitTask.jsx<br>
+              AttendanceSummary.jsx<br>
+              PerformanceCard.jsx
+            </div>
+          </div>
+
+          <div class="comp">
+            <div class="comp-title" style="color:var(--admin)">⚙️ Admin Panel</div>
+            <div class="comp-detail">
+              AdminDashboard.jsx<br>
+              CreateTask.jsx<br>
+              ViewSubmissions.jsx<br>
+              InternList.jsx<br>
+              AttendanceReport.jsx
+            </div>
+          </div>
+
+          <div class="comp">
+            <div class="comp-title" style="color:var(--service)">🔧 Shared / Utils</div>
+            <div class="comp-detail">
+              axios.instance.js (baseURL + Auth header)<br>
+              AuthContext.jsx (React Context)<br>
+              useAuth() hook<br>
+              api/ service files
+            </div>
+          </div>
+
+          <div style="margin-top:10px;font-size:9px;color:var(--text-dim);border-top:1px solid var(--border);padding-top:8px;">
+            <span style="color:var(--react)">AXIOS</span> intercepts every request →<br>
+            Injects <span style="color:var(--jwt)">Authorization: Bearer &lt;JWT&gt;</span><br>
+            Handles 401 → redirect to /login
+          </div>
+
+        </div>
+      </div>
+
+      <!-- FOLDER STRUCTURE -->
+      <div class="panel" style="border-color:rgba(74,85,104,0.4)">
+        <div class="panel-header" style="color:var(--text-dim);background:rgba(74,85,104,0.1)">
+          <div class="dot" style="background:var(--muted)"></div>
+          Folder Structure
+        </div>
+        <div class="panel-body">
+          <div class="tree">
+            <div><span class="tree-dir">client/src/</span></div>
+            <div>&nbsp;&nbsp;<span class="tree-dir">pages/</span></div>
+            <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="tree-hl">auth/ intern/ admin/</span></div>
+            <div>&nbsp;&nbsp;<span class="tree-dir">components/</span></div>
+            <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="tree-hl">TaskList/ SubmitTask/</span></div>
+            <div>&nbsp;&nbsp;<span class="tree-dir">context/ hooks/ api/</span></div>
+            <div><span class="tree-dir">server/</span></div>
+            <div>&nbsp;&nbsp;<span class="tree-dir">routes/ controllers/</span></div>
+            <div>&nbsp;&nbsp;<span class="tree-dir">services/ models/</span></div>
+            <div>&nbsp;&nbsp;<span class="tree-dir">middleware/ config/</span></div>
+            <div>&nbsp;&nbsp;<span class="tree-hl">server.js</span></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ════════════ CENTER: BACKEND ════════════ -->
+    <div class="center-col">
+
+      <!-- REQUEST LIFECYCLE -->
+      <div class="panel layer-jwt">
+        <div class="panel-header">
+          <div class="dot" style="background:var(--jwt)"></div>
+          Request Lifecycle & JWT Middleware Chain
+        </div>
+        <div class="panel-body">
+          <div class="mw-chain">
+            <div class="mw-step">
+              <div class="mw-num" style="background:rgba(97,218,251,0.2);color:var(--react)">1</div>
+              <div>
+                <div style="font-weight:600;color:var(--text)">HTTP Request arrives</div>
+                <div style="color:var(--text-dim)">Client sends: <span style="color:var(--jwt)">Authorization: Bearer &lt;token&gt;</span></div>
+              </div>
+            </div>
+            <div class="mw-step">
+              <div class="mw-num" style="background:rgba(104,211,145,0.2);color:var(--success)">2</div>
+              <div>
+                <div style="font-weight:600;color:var(--text)">cors() + express.json()</div>
+                <div style="color:var(--text-dim)">Global Express middleware applied</div>
+              </div>
+            </div>
+            <div class="mw-step">
+              <div class="mw-num" style="background:rgba(246,173,85,0.2);color:var(--warning)">3</div>
+              <div>
+                <div style="font-weight:600;color:var(--text)">verifyToken middleware</div>
+                <div style="color:var(--text-dim)">jwt.verify(token, JWT_SECRET) → attaches req.user {id, role}</div>
+              </div>
+            </div>
+            <div class="mw-step">
+              <div class="mw-num" style="background:rgba(252,129,129,0.2);color:var(--admin)">4</div>
+              <div>
+                <div style="font-weight:600;color:var(--text)">authorizeRole(...roles) middleware</div>
+                <div style="color:var(--text-dim)">Check req.user.role ∈ allowedRoles → 403 if denied</div>
+              </div>
+            </div>
+            <div class="mw-step">
+              <div class="mw-num" style="background:rgba(183,148,244,0.2);color:var(--service)">5</div>
+              <div>
+                <div style="font-weight:600;color:var(--text)">Route Handler → Controller</div>
+                <div style="color:var(--text-dim)">Business logic executes → calls Service layer</div>
+              </div>
+            </div>
+            <div class="mw-step">
+              <div class="mw-num" style="background:rgba(77,179,61,0.2);color:var(--mongo)">6</div>
+              <div>
+                <div style="font-weight:600;color:var(--text)">Service → MongoDB via Mongoose</div>
+                <div style="color:var(--text-dim)">DB operation → response JSON → client</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4-LAYER ARCHITECTURE -->
+      <div class="section-label">Backend 4-Layer Architecture</div>
+
+      <!-- Routes Layer -->
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:6px;overflow:hidden;">
+        <div class="panel-header" style="background:rgba(66,153,225,0.1);color:var(--accent)">
+          <div class="dot" style="background:var(--accent)"></div>
+          ROUTES LAYER &nbsp;—&nbsp; Express Router
+        </div>
+        <div class="panel-body">
+          <div class="h-layer">
+            <div class="layer-box" style="border-color:rgba(246,173,85,0.25)">
+              <div class="layer-box-title" style="color:var(--jwt)">auth.routes.js</div>
+              <div class="item">POST /api/auth/register</div>
+              <div class="item">POST /api/auth/login</div>
+              <div class="item">GET /api/auth/me</div>
+            </div>
+            <div class="layer-box" style="border-color:rgba(183,148,244,0.25)">
+              <div class="layer-box-title" style="color:var(--service)">task.routes.js</div>
+              <div class="item">POST /api/tasks (admin)</div>
+              <div class="item">GET /api/tasks (intern)</div>
+              <div class="item">PUT /api/tasks/:id</div>
+              <div class="item">POST /api/tasks/:id/submit</div>
+            </div>
+            <div class="layer-box" style="border-color:rgba(118,228,247,0.2)">
+              <div class="layer-box-title" style="color:var(--intern)">attendance.routes.js</div>
+              <div class="item">POST /api/attendance/checkin</div>
+              <div class="item">GET /api/attendance/summary</div>
+              <div class="item">GET /api/attendance/all (admin)</div>
+            </div>
+            <div class="layer-box" style="border-color:rgba(104,211,145,0.2)">
+              <div class="layer-box-title" style="color:var(--success)">performance.routes.js</div>
+              <div class="item">GET /api/performance/:id</div>
+              <div class="item">GET /api/performance/all</div>
+              <div class="item">GET /api/performance/eligibility</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Controllers Layer -->
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:6px;overflow:hidden;">
+        <div class="panel-header" style="background:rgba(183,148,244,0.1);color:var(--service)">
+          <div class="dot" style="background:var(--service)"></div>
+          CONTROLLERS LAYER &nbsp;—&nbsp; Request / Response Handling
+        </div>
+        <div class="panel-body">
+          <div class="h-layer">
+            <div class="layer-box">
+              <div class="layer-box-title" style="color:var(--jwt)">authController.js</div>
+              <div class="item">register()</div>
+              <div class="item">login() → sign JWT</div>
+              <div class="item">getMe()</div>
+            </div>
+            <div class="layer-box">
+              <div class="layer-box-title" style="color:var(--service)">taskController.js</div>
+              <div class="item">createTask()</div>
+              <div class="item">getMyTasks()</div>
+              <div class="item">updateStatus()</div>
+              <div class="item">submitTask()</div>
+            </div>
+            <div class="layer-box">
+              <div class="layer-box-title" style="color:var(--intern)">attendanceController.js</div>
+              <div class="item">checkIn()</div>
+              <div class="item">getSummary()</div>
+              <div class="item">getAllAttendance()</div>
+            </div>
+            <div class="layer-box">
+              <div class="layer-box-title" style="color:var(--success)">performanceController.js</div>
+              <div class="item">getMetrics()</div>
+              <div class="item">getAllMetrics()</div>
+              <div class="item">checkEligibility()</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Services Layer -->
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:6px;overflow:hidden;">
+        <div class="panel-header" style="background:rgba(104,211,145,0.08);color:var(--success)">
+          <div class="dot" style="background:var(--success)"></div>
+          SERVICE LAYER &nbsp;—&nbsp; Business Logic
+        </div>
+        <div class="panel-body">
+          <div class="h-layer">
+            <div class="layer-box">
+              <div class="layer-box-title" style="color:var(--jwt)">authService.js</div>
+              <div class="item">hashPassword(bcrypt)</div>
+              <div class="item">comparePassword()</div>
+              <div class="item">generateToken()</div>
+              <div class="item">verifyToken()</div>
+            </div>
+            <div class="layer-box">
+              <div class="layer-box-title" style="color:var(--service)">taskService.js</div>
+              <div class="item">createTaskDB()</div>
+              <div class="item">fetchTasksByIntern()</div>
+              <div class="item">updateTaskStatus()</div>
+              <div class="item">validateDeadline()</div>
+            </div>
+            <div class="layer-box">
+              <div class="layer-box-title" style="color:var(--intern)">attendanceService.js</div>
+              <div class="item">checkDuplicateEntry()</div>
+              <div class="item">markAttendance()</div>
+              <div class="item">calcPercentage()</div>
+            </div>
+            <div class="layer-box" style="border-color:rgba(183,148,244,0.3)">
+              <div class="layer-box-title" style="color:var(--service)">performanceService.js</div>
+              <div class="item">calcTaskCompletion()</div>
+              <div class="item">calcAttendanceRate()</div>
+              <div class="item">checkEligibility()</div>
+              <div class="item">aggregateMetrics()</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Performance Calculations -->
+      <div class="panel layer-service">
+        <div class="panel-header">
+          <div class="dot" style="background:var(--service)"></div>
+          Performance Calculation Logic
+        </div>
+        <div class="panel-body">
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
+            <div class="calc-box">
+              <div class="calc-title">📊 Task Completion %</div>
+              <div class="calc-formula">
+                completed = Task.count<br>
+                &nbsp;&nbsp;{assignedTo, status:'completed'}<br>
+                total = Task.count({assignedTo})<br>
+                <strong>rate = (completed/total)*100</strong>
+              </div>
+            </div>
+            <div class="calc-box">
+              <div class="calc-title">📅 Attendance %</div>
+              <div class="calc-formula">
+                present = Attendance.count<br>
+                &nbsp;&nbsp;{internId, status:'present'}<br>
+                workingDays = totalDaysInPeriod<br>
+                <strong>rate = (present/working)*100</strong>
+              </div>
+            </div>
+            <div class="calc-box">
+              <div class="calc-title">🎯 Eligibility Check</div>
+              <div class="calc-formula">
+                internStart = user.createdAt<br>
+                elapsed = now - start (months)<br>
+                eligible if elapsed ≥<br>
+                <strong>3 | 6 | 12 months</strong><br>
+                & attendance ≥ 75%
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Role Access Matrix -->
+      <div class="panel" style="border-color:rgba(252,129,129,0.3);">
+        <div class="panel-header" style="background:rgba(252,129,129,0.08);color:var(--admin);">
+          <div class="dot" style="background:var(--admin)"></div>
+          Role-Based Access Control Matrix
+        </div>
+        <div class="panel-body">
+          <div style="overflow-x:auto;">
+            <table style="width:100%;border-collapse:collapse;font-size:10px;">
+              <thead>
+                <tr style="border-bottom:1px solid var(--border);">
+                  <th style="text-align:left;padding:6px 8px;color:var(--text-dim);font-weight:600;">Endpoint</th>
+                  <th style="padding:6px 10px;color:var(--admin);">ADMIN</th>
+                  <th style="padding:6px 10px;color:var(--intern);">INTERN</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr style="border-bottom:1px solid var(--border);">
+                  <td style="padding:5px 8px;color:var(--text-dim);">POST /api/auth/register</td>
+                  <td style="text-align:center;color:var(--success);">✓</td><td style="text-align:center;color:var(--success);">✓</td>
+                </tr>
+                <tr style="border-bottom:1px solid var(--border);">
+                  <td style="padding:5px 8px;color:var(--text-dim);">POST /api/tasks (create)</td>
+                  <td style="text-align:center;color:var(--success);">✓</td><td style="text-align:center;color:var(--danger);">✗</td>
+                </tr>
+                <tr style="border-bottom:1px solid var(--border);">
+                  <td style="padding:5px 8px;color:var(--text-dim);">GET /api/tasks (my tasks)</td>
+                  <td style="text-align:center;color:var(--danger);">✗</td><td style="text-align:center;color:var(--success);">✓</td>
+                </tr>
+                <tr style="border-bottom:1px solid var(--border);">
+                  <td style="padding:5px 8px;color:var(--text-dim);">PUT /api/tasks/:id/status</td>
+                  <td style="text-align:center;color:var(--success);">✓</td><td style="text-align:center;color:var(--danger);">✗</td>
+                </tr>
+                <tr style="border-bottom:1px solid var(--border);">
+                  <td style="padding:5px 8px;color:var(--text-dim);">POST /api/tasks/:id/submit</td>
+                  <td style="text-align:center;color:var(--danger);">✗</td><td style="text-align:center;color:var(--success);">✓</td>
+                </tr>
+                <tr style="border-bottom:1px solid var(--border);">
+                  <td style="padding:5px 8px;color:var(--text-dim);">POST /api/attendance/checkin</td>
+                  <td style="text-align:center;color:var(--danger);">✗</td><td style="text-align:center;color:var(--success);">✓</td>
+                </tr>
+                <tr style="border-bottom:1px solid var(--border);">
+                  <td style="padding:5px 8px;color:var(--text-dim);">GET /api/attendance/all</td>
+                  <td style="text-align:center;color:var(--success);">✓</td><td style="text-align:center;color:var(--danger);">✗</td>
+                </tr>
+                <tr>
+                  <td style="padding:5px 8px;color:var(--text-dim);">GET /api/performance/all</td>
+                  <td style="text-align:center;color:var(--success);">✓</td><td style="text-align:center;color:var(--danger);">✗</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ════════════ RIGHT: DATABASE ════════════ -->
+    <div style="display:flex;flex-direction:column;gap:14px;">
+
+      <div class="panel layer-mongo">
+        <div class="panel-header">
+          <div class="dot" style="background:var(--mongo)"></div>
+          MongoDB Collections
+        </div>
+        <div class="panel-body">
+
+          <div class="schema">
+            <div class="schema-title">users</div>
+            <div class="field">
+              <span>_id</span>: <em>ObjectId</em><br>
+              <span>name</span>: <em>String</em> [required]<br>
+              <span>email</span>: <em>String</em> [unique]<br>
+              <span>password</span>: <em>String</em> [hashed]<br>
+              <span>role</span>: <em>enum['admin','intern']</em><br>
+              <span>createdAt</span>: <em>Date</em>
+            </div>
+          </div>
+
+          <div class="rel">
+            <span style="font-size:9px;color:var(--mongo)">users._id</span>
+            <div class="rel-line"></div>
+            <div class="rel-label">1 : N</div>
+            <div class="rel-line"></div>
+            <span style="font-size:9px;color:var(--service)">tasks.assignedTo</span>
+          </div>
+
+          <div class="schema">
+            <div class="schema-title">tasks</div>
+            <div class="field">
+              <span>_id</span>: <em>ObjectId</em><br>
+              <span>title</span>: <em>String</em> [required]<br>
+              <span>description</span>: <em>String</em><br>
+              <span>assignedTo</span>: <em>ref: User</em><br>
+              <span>deadline</span>: <em>Date</em><br>
+              <span>status</span>: <em>enum['pending','completed']</em><br>
+              <span>submissionLink</span>: <em>String</em><br>
+              <span>createdBy</span>: <em>ref: User (admin)</em>
+            </div>
+          </div>
+
+          <div class="rel">
+            <span style="font-size:9px;color:var(--mongo)">users._id</span>
+            <div class="rel-line"></div>
+            <div class="rel-label">1 : N</div>
+            <div class="rel-line"></div>
+            <span style="font-size:9px;color:var(--intern)">attendance.internId</span>
+          </div>
+
+          <div class="schema">
+            <div class="schema-title">attendances</div>
+            <div class="field">
+              <span>_id</span>: <em>ObjectId</em><br>
+              <span>internId</span>: <em>ref: User</em><br>
+              <span>date</span>: <em>Date</em><br>
+              <span>status</span>: <em>enum['present','absent']</em><br>
+              <span>timestamp</span>: <em>Date (auto)</em>
+            </div>
+            <div style="margin-top:8px;font-size:9px;color:var(--warning);background:rgba(246,173,85,0.08);border-radius:3px;padding:5px 7px;">
+              🔒 Compound Index: {internId, date} unique<br>
+              Prevents duplicate daily check-in
+            </div>
+          </div>
+
+          <div class="schema" style="border-color:rgba(183,148,244,0.3)">
+            <div class="schema-title" style="color:var(--service)">performance (computed / virtual)</div>
+            <div class="field">
+              <span>internId</span>: <em>ref: User</em><br>
+              <span>taskCompletionRate</span>: <em>Number%</em><br>
+              <span>attendanceRate</span>: <em>Number%</em><br>
+              <span>isEligible3m</span>: <em>Boolean</em><br>
+              <span>isEligible6m</span>: <em>Boolean</em><br>
+              <span>isEligible12m</span>: <em>Boolean</em><br>
+              <span style="color:var(--text-dim);font-size:9px;">↳ Computed at runtime from tasks + attendance aggregation</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- AUTH DETAIL -->
+      <div class="panel layer-jwt">
+        <div class="panel-header">
+          <div class="dot" style="background:var(--jwt)"></div>
+          JWT Auth Flow
+        </div>
+        <div class="panel-body" style="font-size:10px;">
+
+          <div style="margin-bottom:10px;">
+            <div style="color:var(--success);font-weight:600;margin-bottom:5px;">Register</div>
+            <div style="color:var(--text-dim);line-height:1.9;">
+              1. Validate email uniqueness<br>
+              2. <span style="color:var(--warning)">bcrypt.hash(password, 10)</span><br>
+              3. Save User to MongoDB<br>
+              4. Return 201 Created
+            </div>
+          </div>
+
+          <div style="border-top:1px solid var(--border);padding-top:10px;margin-bottom:10px;">
+            <div style="color:var(--accent);font-weight:600;margin-bottom:5px;">Login</div>
+            <div style="color:var(--text-dim);line-height:1.9;">
+              1. Find user by email<br>
+              2. <span style="color:var(--warning)">bcrypt.compare(input, hash)</span><br>
+              3. <span style="color:var(--jwt)">jwt.sign({id, role}, SECRET, {expiresIn:'7d'})</span><br>
+              4. Return token to client
+            </div>
+          </div>
+
+          <div style="border-top:1px solid var(--border);padding-top:10px;">
+            <div style="color:var(--admin);font-weight:600;margin-bottom:5px;">Token Validation</div>
+            <div style="color:var(--text-dim);line-height:1.9;">
+              Extract: <span style="color:var(--jwt)">req.headers.authorization</span><br>
+              Split: <span style="color:var(--react)">"Bearer &lt;token&gt;"</span><br>
+              Verify: <span style="color:var(--jwt)">jwt.verify(token, SECRET)</span><br>
+              Attach: <span style="color:var(--success)">req.user = decoded payload</span><br>
+              Invalid → 401 Unauthorized
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Attendance Logic -->
+      <div class="panel" style="border-color:rgba(118,228,247,0.3)">
+        <div class="panel-header" style="background:rgba(118,228,247,0.08);color:var(--intern)">
+          <div class="dot" style="background:var(--intern)"></div>
+          Attendance Check-In Guard
+        </div>
+        <div class="panel-body" style="font-size:10px;color:var(--text-dim);line-height:2;">
+          <div>1. Get <span style="color:var(--intern)">req.user.id</span> from token</div>
+          <div>2. today = <span style="color:var(--warning)">new Date().setHours(0,0,0,0)</span></div>
+          <div>3. Query: <span style="color:var(--mongo)">Attendance.findOne({internId, date:today})</span></div>
+          <div>4. If found → <span style="color:var(--danger)">409 Already checked in</span></div>
+          <div>5. Else → <span style="color:var(--success)">Create new Attendance record</span></div>
+          <div>6. Return 201 with record</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- DATA FLOW DIAGRAM -->
+  <div class="section-label" style="margin-top:28px;">End-to-End Data Flow — Example: Intern Submits Task</div>
+  <div class="dataflow">
+    <div class="df-col">
+      <div class="df-title" style="color:var(--react)">① React Client</div>
+      <div class="df-step">User clicks "Submit Task"</div>
+      <div class="df-step">SubmitTask.jsx calls taskAPI.submit(id, link)</div>
+      <div class="df-step">axios sends POST /api/tasks/:id/submit + Bearer token</div>
+    </div>
+    <div class="df-col">
+      <div class="df-title" style="color:var(--jwt)">② Middleware</div>
+      <div class="df-step">verifyToken() extracts & validates JWT</div>
+      <div class="df-step">req.user = {id: internId, role: 'intern'}</div>
+      <div class="df-step">authorizeRole('intern') passes ✓</div>
+    </div>
+    <div class="df-col">
+      <div class="df-title" style="color:var(--service)">③ Controller / Service</div>
+      <div class="df-step">taskController.submitTask(req, res)</div>
+      <div class="df-step">Validates req.user.id === task.assignedTo</div>
+      <div class="df-step">taskService.updateSubmission(id, link)</div>
+    </div>
+    <div class="df-col">
+      <div class="df-title" style="color:var(--mongo)">④ Database</div>
+      <div class="df-step">Task.findByIdAndUpdate(id, {submissionLink, status:'completed'})</div>
+      <div class="df-step">Mongoose returns updated document</div>
+    </div>
+    <div class="df-col">
+      <div class="df-title" style="color:var(--success)">⑤ Response</div>
+      <div class="df-step">Controller sends 200 + updated task JSON</div>
+      <div class="df-step">React state updated → TaskList re-renders</div>
+      <div class="df-step">PerformanceCard recalculates metrics</div>
+    </div>
+  </div>
+
+  <!-- LEGEND -->
+  <div class="legend">
+    <div style="font-size:9px;font-weight:700;letter-spacing:2px;color:var(--text-dim);margin-right:6px;align-self:center;">LEGEND</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--react)"></div>React Frontend</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--express)"></div>Express.js API</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--mongo)"></div>MongoDB</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--jwt)"></div>JWT / Auth</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--service)"></div>Service Layer</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--admin)"></div>Admin Role</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--intern)"></div>Intern Role</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--success)"></div>Success / GET</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--warning)"></div>Modification / PUT</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--danger)"></div>Error / DELETE</div>
+    <div style="margin-left:auto;font-size:9px;color:var(--text-dim);">Internship Management System · MERN LLD · v1.0</div>
+  </div>
+
+</div>
+</body>
+</html>
