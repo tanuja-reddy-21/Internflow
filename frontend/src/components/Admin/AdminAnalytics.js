@@ -23,8 +23,31 @@ const AdminAnalytics = () => {
     }
   };
 
-  const handleExportCSV = () => {
-    alert('CSV export feature coming soon.\n\nThis feature is currently under development and will be available in a future update.');
+  const handleExportCSV = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('http://localhost:5000/api/analytics/admin/export', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      if (!response.ok) {
+        throw new Error('Export failed');
+      }
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `intern-analytics-${new Date().toISOString().split('T')[0]}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error('Export error:', error);
+      alert('Failed to export CSV. Please try again.');
+    }
   };
 
   const sortedAnalytics = [...analytics].sort((a, b) => {
@@ -54,11 +77,10 @@ const AdminAnalytics = () => {
           </select>
           <button 
             onClick={handleExportCSV} 
-            className="btn-export-csv btn-export-disabled"
-            title="CSV export feature coming soon"
-            aria-label="CSV export feature coming soon"
+            className="btn-export-csv"
+            title="Export analytics to CSV"
           >
-            📊 Export CSV (Coming Soon)
+            📊 Export CSV
           </button>
         </div>
       </div>

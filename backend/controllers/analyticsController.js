@@ -194,7 +194,82 @@ function calculatePerformanceScore({ attendancePercentage, taskCompletionRate, s
   };
 }
 
+// @desc    Export admin analytics as CSV
+// @route   GET /api/analytics/admin/export
+// @access  Admin
+const exportAdminAnalyticsCSV = async (req, res) => {
+  try {
+    const adminDomain = req.user.domain;
+    
+    if (!adminDomain) {
+      console.warn(`[ACCESS_DENIED] Admin ${req.user._id} has no domain`);
+      return res.status(403).json({ message: 'Access denied: No domain assigned' });
+    }
+
+    const interns = await User.find({ 
+      role: 'intern',
+      domain: adminDomain 
+    });
+    
+    if (interns.length === 0) {
+      return res.status(404).json({ message: 'No interns found in your domain' });
+    }
+
+    const analyticsPromises = interns.map(async (intern) => {
+      if (intern.domain !== adminDomain) {
+        console.error(`[SECURITY_VIOLATION] Domain mismatch for intern ${intern._id}`);
+        return null;
+      }
+
+      const tasks = await Task.find({ assignedTo: intern._id });
+      const submissions = await Submission.find({ internId: intern._id });
+      const attendance = await Attendance.find({ internId: intern._id });
+
+      const totalDays = attendance.length;
+      const presentDays = attendance.filter(a => a.status === 'present' || a.status === 'late').length;
+      const absentDays = attendance.filter(a => a.status === 'absent').length;
+      const attendancePercentage = totalDays > 0 ? ((presentDays / totalDays) * 100).toFixed(2) : 0;
+      
+      const approvedTasks = submissions.filter(s => s.status === 'approved').length;
+      const pendingTasks = tasks.length - submissions.length;
+      const taskCompletionRate = tasks.length > 0 ? ((approvedTasks / tasks.length) * 100).toFixed(2) : 0;
+
+      return {
+        name: intern.fullName,
+        email: intern.email,
+        domain: intern.domain,
+        totalTasks: tasks.length,
+        completedTasks: approvedTasks,
+        pendingTasks,
+        taskCompletionRate,
+        totalDays,
+        presentDays,
+        absentDays,
+        attendancePercentage
+      };
+    });
+
+    const analytics = (await Promise.all(analyticsPromises)).filter(a => a !== null);
+
+    const csvHeader = 'Name,Email,Domain,Total Tasks,Completed Tasks,Pending Tasks,Task Completion Rate (%),Total Days,Present Days,Absent Days,Attendance Rate (%)\n';
+    const csvRows = analytics.map(a => 
+      `"${a.name}","${a.email}","${a.domain}",${a.totalTasks},${a.completedTasks},${a.pendingTasks},${a.taskCompletionRate},${a.totalDays},${a.presentDays},${a.absentDays},${a.attendancePercentage}`
+    ).join('\n');
+    
+    const csv = csvHeader + csvRows;
+    const filename = `intern-analytics-${adminDomain.replace(/\s+/g, '-')}-${new Date().toISOString().split('T')[0]}.csv`;
+
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.send(csv);
+  } catch (error) {
+    console.error('[EXPORT_CSV_ERROR]', error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   getInternAnalytics,
-  getAdminAnalytics
+  getAdminAnalytics,
+  exportAdminAnalyticsCSV
 };
