@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-
 const attendanceSchema = new mongoose.Schema({
   internId: {
     type: mongoose.Schema.Types.ObjectId,
@@ -26,8 +25,5 @@ const attendanceSchema = new mongoose.Schema({
 }, {
   timestamps: true
 });
-
-// Ensure one attendance record per intern per day
 attendanceSchema.index({ internId: 1, date: 1 }, { unique: true });
-
 module.exports = mongoose.model('Attendance', attendanceSchema);

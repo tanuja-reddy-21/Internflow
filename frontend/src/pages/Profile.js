@@ -4,7 +4,6 @@ import { useAuth } from '../context/AuthContext';
 import API from '../utils/api';
 import Navbar from '../components/Navbar';
 import './Profile.css';
-
 const Profile = () => {
   const { userId } = useParams();
   const { user: currentUser } = useAuth();
@@ -19,15 +18,12 @@ const Profile = () => {
     companyName: '',
     phoneNumber: ''
   });
-
   React.useEffect(() => {
     document.title = 'Profile | InternFlow';
   }, []);
-
   useEffect(() => {
     fetchProfile();
   }, [userId]);
-
   const fetchProfile = async () => {
     try {
       const { data } = await API.get(`/profile/${userId}`);
@@ -44,7 +40,6 @@ const Profile = () => {
       setLoading(false);
     }
   };
-
   const handleUpdate = async (e) => {
     e.preventDefault();
     try {
@@ -55,7 +50,6 @@ const Profile = () => {
       setError(error.response?.data?.message || 'Failed to update profile');
     }
   };
-
   if (loading) return <div className="loading">Loading profile...</div>;
   if (error) return (
     <div>
@@ -67,10 +61,8 @@ const Profile = () => {
       </div>
     </div>
   );
-
   const isOwnProfile = currentUser._id === userId;
   const isAdmin = profile.user.role === 'admin';
-
   return (
     <div>
       <Navbar />
@@ -79,7 +71,6 @@ const Profile = () => {
           <h1>User Profile</h1>
           {!isOwnProfile && <span className="view-only-badge">View Only</span>}
         </div>
-
         {/* Basic Identity */}
         <section className="profile-section">
           <h2>Basic Identity</h2>
@@ -126,7 +117,6 @@ const Profile = () => {
             )}
           </div>
         </section>
-
         {/* Additional Information */}
         <section className="profile-section">
           <div className="section-header">
@@ -137,7 +127,6 @@ const Profile = () => {
               </button>
             )}
           </div>
-
           {editing ? (
             <form onSubmit={handleUpdate} className="profile-form">
               <div className="form-group">
@@ -155,7 +144,7 @@ const Profile = () => {
                   type="url"
                   value={formData.resumeUrl}
                   onChange={(e) => setFormData({ ...formData, resumeUrl: e.target.value })}
-                  placeholder="https://drive.google.com/..."
+                  placeholder="https:
                 />
               </div>
               {isAdmin && (
@@ -207,7 +196,6 @@ const Profile = () => {
             </div>
           )}
         </section>
-
         {/* Work & Progress - Interns Only */}
         {!isAdmin && profile.workProgress && (
           <section className="profile-section">
@@ -232,7 +220,6 @@ const Profile = () => {
             </div>
           </section>
         )}
-
         {/* Performance Analytics - Interns Only */}
         {!isAdmin && profile.performance && (
           <section className="profile-section">
@@ -263,7 +250,6 @@ const Profile = () => {
                   </div>
                 </div>
               </div>
-
               <div className="performance-card">
                 <h3>Task Completion</h3>
                 <div className="performance-metric">
@@ -280,7 +266,6 @@ const Profile = () => {
             </div>
           </section>
         )}
-
         {/* Certification Eligibility - Interns Only */}
         {!isAdmin && profile.eligibility && (
           <section className="profile-section">
@@ -294,7 +279,6 @@ const Profile = () => {
                   {profile.eligibility.status}
                 </span>
               </div>
-              
               {profile.eligibility.reasons && profile.eligibility.reasons.length > 0 && (
                 <div className="eligibility-reasons">
                   <h4>Reasons for Ineligibility:</h4>
@@ -305,7 +289,6 @@ const Profile = () => {
                   </ul>
                 </div>
               )}
-              
               <div className="eligibility-criteria">
                 <h4>Eligibility Criteria</h4>
                 <div className="criteria-list">
@@ -326,5 +309,4 @@ const Profile = () => {
     </div>
   );
 };
-
 export default Profile;

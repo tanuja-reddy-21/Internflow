@@ -1,18 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import API from '../../utils/api';
 import './SubmissionReview.css';
-
 const SubmissionReview = ({ onUpdate }) => {
   const [submissions, setSubmissions] = useState([]);
   const [filter, setFilter] = useState('all');
   const [selectedSubmission, setSelectedSubmission] = useState(null);
   const [feedback, setFeedback] = useState('');
   const [loading, setLoading] = useState(true);
-
   useEffect(() => {
     fetchSubmissions();
   }, []);
-
   const fetchSubmissions = async () => {
     try {
       const { data } = await API.get('/submissions');
@@ -23,7 +20,6 @@ const SubmissionReview = ({ onUpdate }) => {
       setLoading(false);
     }
   };
-
   const handleReview = async (submissionId, status) => {
     try {
       await API.put(`/submissions/${submissionId}/review`, {
@@ -38,14 +34,11 @@ const SubmissionReview = ({ onUpdate }) => {
       alert('Failed to update submission');
     }
   };
-
   const filteredSubmissions = submissions.filter(sub => {
     if (filter === 'all') return true;
     return sub.status === filter;
   });
-
   if (loading) return <div>Loading submissions...</div>;
-
   return (
     <div className="submission-review">
       <div className="section-header">
@@ -77,7 +70,6 @@ const SubmissionReview = ({ onUpdate }) => {
           </button>
         </div>
       </div>
-
       {filteredSubmissions.length === 0 ? (
         <p className="no-data">No submissions found.</p>
       ) : (
@@ -143,7 +135,6 @@ const SubmissionReview = ({ onUpdate }) => {
           </table>
         </div>
       )}
-
       {selectedSubmission && (
         <div className="modal-overlay" onClick={() => setSelectedSubmission(null)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
@@ -151,13 +142,11 @@ const SubmissionReview = ({ onUpdate }) => {
               <h2>Review Submission</h2>
               <button className="close-btn" onClick={() => setSelectedSubmission(null)}>×</button>
             </div>
-
             <div className="review-details">
               <p><strong>Intern:</strong> {selectedSubmission.internId?.fullName}</p>
               <p><strong>Task:</strong> {selectedSubmission.taskId?.title}</p>
               <p><strong>Link:</strong> <a href={selectedSubmission.submissionLink} target="_blank" rel="noopener noreferrer">View</a></p>
             </div>
-
             <div className="form-group">
               <label>Feedback</label>
               <textarea
@@ -167,7 +156,6 @@ const SubmissionReview = ({ onUpdate }) => {
                 placeholder="Provide feedback to the intern..."
               />
             </div>
-
             <div className="modal-actions">
               <button 
                 className="btn-reject"
@@ -188,5 +176,4 @@ const SubmissionReview = ({ onUpdate }) => {
     </div>
   );
 };
-
 export default SubmissionReview;

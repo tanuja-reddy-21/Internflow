@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import API from '../../utils/api';
 import './InviteManagement.css';
-
 const InviteManagement = () => {
   const [invites, setInvites] = useState([]);
   const [showModal, setShowModal] = useState(false);
@@ -9,11 +8,9 @@ const InviteManagement = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-
   useEffect(() => {
     fetchInvites();
   }, []);
-
   const fetchInvites = async () => {
     try {
       const { data } = await API.get('/invites');
@@ -22,13 +19,11 @@ const InviteManagement = () => {
       console.error('Error fetching invites:', error);
     }
   };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setSuccess('');
     setLoading(true);
-
     try {
       const { data } = await API.post('/invites', formData);
       setSuccess(`Invite created! Link: ${data.invite.inviteLink}`);
@@ -41,12 +36,10 @@ const InviteManagement = () => {
       setLoading(false);
     }
   };
-
   const copyToClipboard = (link) => {
     navigator.clipboard.writeText(link);
     alert('Invite link copied to clipboard!');
   };
-
   return (
     <div className="invite-management">
       <div className="section-header">
@@ -55,7 +48,6 @@ const InviteManagement = () => {
           + Create Invite
         </button>
       </div>
-
       <div className="invites-table">
         <table>
           <thead>
@@ -95,14 +87,12 @@ const InviteManagement = () => {
           </tbody>
         </table>
       </div>
-
       {showModal && (
         <div className="modal-overlay" onClick={() => setShowModal(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <h3>Create Invite</h3>
             {error && <div className="error-message">{error}</div>}
             {success && <div className="success-message">{success}</div>}
-            
             <form onSubmit={handleSubmit}>
               <div className="form-group">
                 <label>Email *</label>
@@ -114,7 +104,6 @@ const InviteManagement = () => {
                   placeholder="user@example.com"
                 />
               </div>
-
               <div className="form-group">
                 <label>Role *</label>
                 <select
@@ -125,7 +114,6 @@ const InviteManagement = () => {
                   <option value="admin">Admin</option>
                 </select>
               </div>
-
               <div className="modal-actions">
                 <button type="button" className="btn-secondary" onClick={() => setShowModal(false)}>
                   Cancel
@@ -141,5 +129,4 @@ const InviteManagement = () => {
     </div>
   );
 };
-
 export default InviteManagement;

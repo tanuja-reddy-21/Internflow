@@ -2,16 +2,13 @@ import React, { useState, useEffect } from 'react';
 import API from '../../utils/api';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import './AdminAnalytics.css';
-
 const AdminAnalytics = () => {
   const [analytics, setAnalytics] = useState([]);
   const [loading, setLoading] = useState(true);
   const [sortBy, setSortBy] = useState('name');
-
   useEffect(() => {
     fetchAnalytics();
   }, []);
-
   const fetchAnalytics = async () => {
     try {
       const { data } = await API.get('/analytics/admin/overview');
@@ -22,11 +19,10 @@ const AdminAnalytics = () => {
       setLoading(false);
     }
   };
-
   const handleExportCSV = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5000/api/analytics/admin/export', {
+      const response = await fetch('http:
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -49,22 +45,18 @@ const AdminAnalytics = () => {
       alert('Failed to export CSV. Please try again.');
     }
   };
-
   const sortedAnalytics = [...analytics].sort((a, b) => {
     if (sortBy === 'name') return a.name.localeCompare(b.name);
     if (sortBy === 'attendance') return b.attendancePercentage - a.attendancePercentage;
     if (sortBy === 'completion') return b.taskCompletionRate - a.taskCompletionRate;
     return 0;
   });
-
   const chartData = analytics.map(intern => ({
     name: intern.name.split(' ')[0],
     attendance: parseFloat(intern.attendancePercentage),
     completion: parseFloat(intern.taskCompletionRate)
   }));
-
   if (loading) return <div className="loading">Loading analytics...</div>;
-
   return (
     <div className="admin-analytics">
       <div className="analytics-header">
@@ -84,7 +76,6 @@ const AdminAnalytics = () => {
           </button>
         </div>
       </div>
-
       {/* Comparison Chart */}
       <div className="chart-container">
         <h3>Performance Comparison</h3>
@@ -100,7 +91,6 @@ const AdminAnalytics = () => {
           </BarChart>
         </ResponsiveContainer>
       </div>
-
       {/* Intern Table */}
       <div className="intern-table-container">
         <table className="intern-table">
@@ -120,7 +110,6 @@ const AdminAnalytics = () => {
             {sortedAnalytics.map((intern) => {
               const overallScore = (parseFloat(intern.attendancePercentage) + parseFloat(intern.taskCompletionRate)) / 2;
               const status = overallScore >= 80 ? 'excellent' : overallScore >= 60 ? 'good' : 'needs-improvement';
-              
               return (
                 <tr key={intern.internId}>
                   <td className="intern-name">{intern.name}</td>
@@ -149,7 +138,6 @@ const AdminAnalytics = () => {
           </tbody>
         </table>
       </div>
-
       {/* Summary Stats */}
       <div className="summary-stats">
         <div className="stat-box">
@@ -178,5 +166,4 @@ const AdminAnalytics = () => {
     </div>
   );
 };
-
 export default AdminAnalytics;

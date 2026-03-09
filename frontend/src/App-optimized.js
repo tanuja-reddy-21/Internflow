@@ -3,19 +3,15 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import './App.css';
-
-// Lazy load pages
 const Login = lazy(() => import('./pages/Login'));
 const Register = lazy(() => import('./pages/Register'));
 const InternDashboard = lazy(() => import('./pages/InternDashboard'));
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
-
 const LoadingFallback = () => (
   <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
     <div>Loading...</div>
   </div>
 );
-
 function App() {
   return (
     <AuthProvider>
@@ -24,7 +20,6 @@ function App() {
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
-            
             <Route 
               path="/intern/dashboard" 
               element={
@@ -33,7 +28,6 @@ function App() {
                 </ProtectedRoute>
               } 
             />
-            
             <Route 
               path="/admin/dashboard" 
               element={
@@ -42,7 +36,6 @@ function App() {
                 </ProtectedRoute>
               } 
             />
-
             <Route 
               path="/unauthorized" 
               element={
@@ -52,7 +45,6 @@ function App() {
                 </div>
               } 
             />
-            
             <Route path="/" element={<Navigate to="/login" replace />} />
           </Routes>
         </Suspense>
@@ -60,5 +52,4 @@ function App() {
     </AuthProvider>
   );
 }
-
 export default App;

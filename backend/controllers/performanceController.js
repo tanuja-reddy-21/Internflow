@@ -2,10 +2,7 @@ const Task = require('../models/Task');
 const Submission = require('../models/Submission');
 const Attendance = require('../models/Attendance');
 const User = require('../models/User');
-
-// Centralized eligibility calculation
 const calculateEligibility = (user, attendanceRate, completionRate, totalTasks, totalDays) => {
-  // NOT APPLICABLE for non-intern users
   if (user.role !== 'intern') {
     return {
       status: 'NOT APPLICABLE',
@@ -13,12 +10,9 @@ const calculateEligibility = (user, attendanceRate, completionRate, totalTasks, 
       reasons: ['Certification eligibility applies only to intern users']
     };
   }
-
   const reasons = [];
   const attendance = parseFloat(attendanceRate);
   const completion = parseFloat(completionRate);
-
-  // Check for missing or invalid data
   if (totalTasks === 0) {
     reasons.push('No tasks assigned');
   }
@@ -31,9 +25,7 @@ const calculateEligibility = (user, attendanceRate, completionRate, totalTasks, 
   if (completion < 80) {
     reasons.push('Task completion below 80%');
   }
-
   const isEligible = totalTasks > 0 && totalDays > 0 && attendance >= 75 && completion >= 80;
-
   return {
     status: isEligible ? 'ELIGIBLE' : 'NOT ELIGIBLE',
     isEligible,
@@ -46,25 +38,16 @@ const calculateEligibility = (user, attendanceRate, completionRate, totalTasks, 
     }
   };
 };
-
-// @desc    Get performance metrics
-// @route   GET /api/performance/:internId
-// @access  Private
 const getPerformance = async (req, res) => {
   try {
     const internId = req.params.internId;
-
-    // Check if user is admin - admins don't have performance metrics
     const user = await User.findById(internId);
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
-    
     if (user.role === 'admin') {
       return res.status(403).json({ message: 'Performance metrics not available for admin users' });
     }
-
-    // Task completion
     const totalTasks = await Task.countDocuments({ assignedTo: internId });
     const completedTasks = await Submission.countDocuments({ 
       internId, 
@@ -73,8 +56,6 @@ const getPerformance = async (req, res) => {
     const taskCompletionRate = totalTasks > 0 
       ? ((completedTasks / totalTasks) * 100).toFixed(2) 
       : '0.00';
-
-    // Attendance
     const totalDays = await Attendance.countDocuments({ internId });
     const presentDays = await Attendance.countDocuments({ 
       internId, 
@@ -83,10 +64,7 @@ const getPerformance = async (req, res) => {
     const attendanceRate = totalDays > 0 
       ? ((presentDays / totalDays) * 100).toFixed(2) 
       : '0.00';
-
-    // Calculate eligibility
     const eligibility = calculateEligibility(user, attendanceRate, taskCompletionRate, totalTasks, totalDays);
-
     res.json({
       taskCompletionRate,
       attendanceRate,
@@ -102,5 +80,4 @@ const getPerformance = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-
 module.exports = { getPerformance, calculateEligibility };

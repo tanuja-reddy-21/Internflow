@@ -9,9 +9,7 @@ const {
 const { protect } = require('../middleware/auth');
 const { authorize } = require('../middleware/roleCheck');
 const { enforceDomain, validateInternAccess, validateTaskDomain } = require('../middleware/domainCheck');
-
 const router = express.Router();
-
 router.route('/')
   .get(protect, getTasks)
   .post(
@@ -22,7 +20,6 @@ router.route('/')
     validateInternAccess,
     createTask
   );
-
 router.route('/:id')
   .get(protect, getTaskById)
   .put(
@@ -33,5 +30,4 @@ router.route('/:id')
     updateTask
   )
   .delete(protect, authorize('admin'), enforceDomain, deleteTask);
-
 module.exports = router;

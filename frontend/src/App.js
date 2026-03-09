@@ -3,21 +3,17 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import './App.css';
-
-// Lazy load pages
 const Homepage = lazy(() => import('./pages/Homepage'));
 const Login = lazy(() => import('./pages/Login'));
 const Register = lazy(() => import('./pages/Register'));
 const InternDashboard = lazy(() => import('./pages/InternDashboard'));
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
 const Profile = lazy(() => import('./pages/Profile'));
-
 const LoadingFallback = () => (
   <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
     <div>Loading...</div>
   </div>
 );
-
 function App() {
   return (
     <AuthProvider>
@@ -27,7 +23,6 @@ function App() {
             <Route path="/" element={<Homepage />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
-            
             <Route 
               path="/intern/dashboard" 
               element={
@@ -36,7 +31,6 @@ function App() {
                 </ProtectedRoute>
               } 
             />
-            
             <Route 
               path="/admin/dashboard" 
               element={
@@ -45,7 +39,6 @@ function App() {
                 </ProtectedRoute>
               } 
             />
-
             <Route 
               path="/profile/:userId" 
               element={
@@ -54,7 +47,6 @@ function App() {
                 </ProtectedRoute>
               } 
             />
-
             <Route 
               path="/unauthorized" 
               element={
@@ -70,5 +62,4 @@ function App() {
     </AuthProvider>
   );
 }
-
 export default App;

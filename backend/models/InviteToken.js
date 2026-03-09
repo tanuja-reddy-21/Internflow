@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-
 const inviteTokenSchema = new mongoose.Schema({
   token: {
     type: String,
@@ -33,7 +32,5 @@ const inviteTokenSchema = new mongoose.Schema({
 }, {
   timestamps: true
 });
-
 inviteTokenSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
-
 module.exports = mongoose.model('InviteToken', inviteTokenSchema);

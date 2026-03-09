@@ -1,14 +1,11 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Homepage.css';
-
 const Homepage = () => {
   const navigate = useNavigate();
-
   React.useEffect(() => {
     document.title = 'InternFlow – Internship Management Platform';
   }, []);
-
   return (
     <div className="homepage">
       {/* Navigation */}
@@ -25,7 +22,6 @@ const Homepage = () => {
           </div>
         </div>
       </nav>
-
       {/* Hero Section */}
       <section className="hero">
         <div className="hero-container">
@@ -73,7 +69,6 @@ const Homepage = () => {
           </div>
         </div>
       </section>
-
       {/* How It Works */}
       <section className="how-it-works">
         <div className="section-container">
@@ -105,7 +100,6 @@ const Homepage = () => {
           </div>
         </div>
       </section>
-
       {/* Features Grid */}
       <section className="features-section">
         <div className="section-container">
@@ -138,7 +132,6 @@ const Homepage = () => {
           </div>
         </div>
       </section>
-
       {/* CTA Section */}
       <section className="cta-section">
         <div className="cta-container">
@@ -149,7 +142,6 @@ const Homepage = () => {
           </button>
         </div>
       </section>
-
       {/* Footer */}
       <footer className="homepage-footer">
         <div className="footer-container">
@@ -177,5 +169,4 @@ const Homepage = () => {
     </div>
   );
 };
-
 export default Homepage;

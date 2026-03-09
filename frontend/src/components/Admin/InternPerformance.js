@@ -1,26 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import API from '../../utils/api';
 import './InternPerformance.css';
-
 const InternPerformance = () => {
   const [interns, setInterns] = useState([]);
   const [performances, setPerformances] = useState({});
   const [loading, setLoading] = useState(true);
-
   useEffect(() => {
     fetchPerformanceData();
   }, []);
-
   const fetchPerformanceData = async () => {
     try {
-      // Fetch all submissions to get unique intern IDs
       const { data: submissions } = await API.get('/submissions');
-      
       const uniqueInterns = [...new Set(submissions.map(s => s.internId))];
-      
-      // Fetch performance for each intern
       const performancePromises = uniqueInterns
-        .filter(intern => intern) // Remove null values
+        .filter(intern => intern) 
         .map(async (intern) => {
           try {
             const { data } = await API.get(`/performance/${intern._id}`);
@@ -29,14 +22,11 @@ const InternPerformance = () => {
             return null;
           }
         });
-
       const performanceData = await Promise.all(performancePromises);
-      
       const performanceMap = {};
       performanceData.filter(p => p).forEach(p => {
         performanceMap[p.internId] = p;
       });
-
       setPerformances(performanceMap);
       setLoading(false);
     } catch (error) {
@@ -44,19 +34,14 @@ const InternPerformance = () => {
       setLoading(false);
     }
   };
-
   if (loading) return <div>Loading performance data...</div>;
-
   const performanceList = Object.values(performances);
-
   if (performanceList.length === 0) {
     return <p className="no-data">No intern performance data available.</p>;
   }
-
   return (
     <div className="intern-performance">
       <h2>Intern Performance Overview</h2>
-
       <div className="performance-table">
         <table>
           <thead>
@@ -114,5 +99,4 @@ const InternPerformance = () => {
     </div>
   );
 };
-
 export default InternPerformance;

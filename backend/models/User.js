@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
-
 const userSchema = new mongoose.Schema({
   fullName: {
     type: String,
@@ -80,13 +79,9 @@ const userSchema = new mongoose.Schema({
 }, {
   timestamps: true
 });
-
-// Pre-save validation
 userSchema.pre('save', async function(next) {
-  // Admins should not have internshipDuration
   if (this.role === 'admin') {
     this.internshipDuration = undefined;
-    // Validate admin-specific fields
     if (!this.companyName) {
       return next(new Error('Company Name is required for admin users'));
     }
@@ -94,11 +89,9 @@ userSchema.pre('save', async function(next) {
       return next(new Error('Phone Number is required for admin users'));
     }
   } else {
-    // Non-admins should not have admin fields
     this.companyName = undefined;
     this.phoneNumber = undefined;
   }
-  
   if (!this.isModified('password')) {
     return next();
   }
@@ -106,10 +99,7 @@ userSchema.pre('save', async function(next) {
   this.password = await bcrypt.hash(this.password, salt);
   next();
 });
-
-// Compare password method
 userSchema.methods.comparePassword = async function(enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
-
 module.exports = mongoose.model('User', userSchema);

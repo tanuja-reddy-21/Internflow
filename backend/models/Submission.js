@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-
 const submissionSchema = new mongoose.Schema({
   taskId: {
     type: mongoose.Schema.Types.ObjectId,
@@ -39,8 +38,5 @@ const submissionSchema = new mongoose.Schema({
 }, {
   timestamps: true
 });
-
-// Ensure one submission per intern per task
 submissionSchema.index({ taskId: 1, internId: 1 }, { unique: true });
-
 module.exports = mongoose.model('Submission', submissionSchema);

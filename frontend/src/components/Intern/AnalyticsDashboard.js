@@ -6,17 +6,14 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
 import './AnalyticsDashboard.css';
-
 const AnalyticsDashboard = () => {
   const { user } = useAuth();
   const [analytics, setAnalytics] = useState(null);
   const [loading, setLoading] = useState(true);
   const [dateRange, setDateRange] = useState({ startDate: '', endDate: '' });
-
   useEffect(() => {
     fetchAnalytics();
   }, []);
-
   const fetchAnalytics = async () => {
     try {
       const params = dateRange.startDate && dateRange.endDate 
@@ -30,29 +27,22 @@ const AnalyticsDashboard = () => {
       setLoading(false);
     }
   };
-
   const handleDateFilter = () => {
     fetchAnalytics();
   };
-
   if (loading) return <div className="loading">Loading analytics...</div>;
   if (!analytics) return <div className="error">Failed to load analytics</div>;
-
   const COLORS = ['#10b981', '#ef4444', '#f59e0b', '#3b82f6'];
-
   const attendancePieData = [
     { name: 'Present', value: analytics.attendance.presentDays },
     { name: 'Absent', value: analytics.attendance.absentDays },
     { name: 'Late', value: analytics.attendance.lateDays }
   ].filter(item => item.value > 0);
-
   const submissionPieData = [
     { name: 'Approved', value: analytics.submissions.approvedTasks },
     { name: 'Rejected', value: analytics.submissions.rejectedTasks },
     { name: 'Pending', value: analytics.submissions.pendingTasks }
   ].filter(item => item.value > 0);
-
-  // ===== MODIFIED: Combine attendance and submission data for grouped bar chart =====
   const combinedChartData = analytics.attendance.monthlyTrend.map(monthData => {
     const weekMatch = analytics.submissions.weeklyTrend.find(w => w._id === monthData._id);
     return {
@@ -61,12 +51,9 @@ const AnalyticsDashboard = () => {
       submissions: weekMatch ? weekMatch.count : 0
     };
   });
-  // ===== END MODIFIED =====
-
   const getKPIColor = (status) => {
     return status === 'excellent' ? '#10b981' : status === 'good' ? '#f59e0b' : '#ef4444';
   };
-
   return (
     <div className="analytics-dashboard">
       <div className="analytics-header">
@@ -85,7 +72,6 @@ const AnalyticsDashboard = () => {
           <button onClick={handleDateFilter} className="btn-filter">Apply Filter</button>
         </div>
       </div>
-
       {/* Performance Score Card */}
       <div className="performance-score-card">
         <h2>Overall Performance Score</h2>
@@ -114,7 +100,6 @@ const AnalyticsDashboard = () => {
           </div>
         </div>
       </div>
-
       {/* KPI Cards */}
       <div className="kpi-grid">
         <div className="kpi-card" style={{ borderLeftColor: getKPIColor(analytics.performance.kpiStatus.attendance) }}>
@@ -144,7 +129,6 @@ const AnalyticsDashboard = () => {
           <span className="kpi-status">Total</span>
         </div>
       </div>
-
       {/* Charts Grid */}
       <div className="charts-grid">
         {/* ===== MODIFIED: Combined Attendance & Submissions Chart ===== */}
@@ -194,7 +178,6 @@ const AnalyticsDashboard = () => {
           </ResponsiveContainer>
         </div>
         {/* ===== END MODIFIED ===== */}
-
         {/* Attendance Distribution */}
         <div className="chart-card">
           <h3>📊 Attendance Distribution</h3>
@@ -218,7 +201,6 @@ const AnalyticsDashboard = () => {
             </PieChart>
           </ResponsiveContainer>
         </div>
-
         {/* Submission Trend */}
         <div className="chart-card">
           <h3>📈 Weekly Submission Trend</h3>
@@ -233,7 +215,6 @@ const AnalyticsDashboard = () => {
             </LineChart>
           </ResponsiveContainer>
         </div>
-
         {/* Task Status Distribution */}
         <div className="chart-card">
           <h3>✅ Task Status Distribution</h3>
@@ -265,7 +246,6 @@ const AnalyticsDashboard = () => {
           )}
         </div>
       </div>
-
       {/* Stats Summary */}
       <div className="stats-summary">
         <div className="summary-card">
@@ -289,7 +269,6 @@ const AnalyticsDashboard = () => {
             </div>
           </div>
         </div>
-
         <div className="summary-card">
           <h3>Task Summary</h3>
           <div className="summary-items">
@@ -312,7 +291,6 @@ const AnalyticsDashboard = () => {
           </div>
         </div>
       </div>
-
       {/* Export Buttons */}
       <div className="export-actions">
         <button className="btn-export" onClick={() => window.print()}>
@@ -325,5 +303,4 @@ const AnalyticsDashboard = () => {
     </div>
   );
 };
-
 export default AnalyticsDashboard;

@@ -2,17 +2,14 @@ import React, { useState, useEffect } from 'react';
 import API from '../../utils/api';
 import CreateTaskModal from './CreateTaskModal';
 import './TaskManagement.css';
-
 const TaskManagement = ({ onUpdate }) => {
   const [tasks, setTasks] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [editTask, setEditTask] = useState(null);
   const [loading, setLoading] = useState(true);
-
   useEffect(() => {
     fetchTasks();
   }, []);
-
   const fetchTasks = async () => {
     try {
       const { data } = await API.get('/tasks');
@@ -23,7 +20,6 @@ const TaskManagement = ({ onUpdate }) => {
       setLoading(false);
     }
   };
-
   const handleDelete = async (taskId) => {
     if (window.confirm('Are you sure you want to delete this task?')) {
       try {
@@ -35,25 +31,20 @@ const TaskManagement = ({ onUpdate }) => {
       }
     }
   };
-
   const handleEdit = (task) => {
     setEditTask(task);
     setShowModal(true);
   };
-
   const handleModalClose = () => {
     setShowModal(false);
     setEditTask(null);
   };
-
   const handleSuccess = () => {
     fetchTasks();
     onUpdate();
     handleModalClose();
   };
-
   if (loading) return <div>Loading tasks...</div>;
-
   return (
     <div className="task-management">
       <div className="section-header">
@@ -65,7 +56,6 @@ const TaskManagement = ({ onUpdate }) => {
           + Create Task
         </button>
       </div>
-
       {tasks.length === 0 ? (
         <p className="no-data">No tasks created yet.</p>
       ) : (
@@ -113,7 +103,6 @@ const TaskManagement = ({ onUpdate }) => {
           </table>
         </div>
       )}
-
       {showModal && (
         <CreateTaskModal
           task={editTask}
@@ -124,5 +113,4 @@ const TaskManagement = ({ onUpdate }) => {
     </div>
   );
 };
-
 export default TaskManagement;

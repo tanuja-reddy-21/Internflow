@@ -3,40 +3,26 @@ const Task = require('../models/Task');
 const Submission = require('../models/Submission');
 const Attendance = require('../models/Attendance');
 const { calculateEligibility } = require('./performanceController');
-
-// @desc    Get user profile with analytics
-// @route   GET /api/profile/:userId
-// @access  Private
 const getUserProfile = async (req, res) => {
   try {
     const { userId } = req.params;
     const requestingUser = req.user;
-
-    // Authorization: Users can only view their own profile
-    // Admins can view intern profiles from their domain
     if (requestingUser._id.toString() !== userId) {
       if (requestingUser.role !== 'admin') {
         return res.status(403).json({ message: 'Access denied: You can only view your own profile' });
       }
-
-      // Admin viewing intern profile - check domain match
       const targetUser = await User.findById(userId);
       if (!targetUser) {
         return res.status(404).json({ message: 'User not found' });
       }
-
       if (targetUser.role === 'admin' || targetUser.domain !== requestingUser.domain) {
         return res.status(403).json({ message: 'Access denied: Domain mismatch' });
       }
     }
-
-    // Fetch user data
     const user = await User.findById(userId).select('-password');
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
-
-    // Base response for all users
     const response = {
       user: {
         _id: user._id,
@@ -50,32 +36,22 @@ const getUserProfile = async (req, res) => {
         isActive: user.isActive
       }
     };
-
-    // ADMIN users: Return only basic identity, no intern-specific data
     if (user.role === 'admin') {
       response.user.companyName = user.companyName;
       response.user.phoneNumber = user.phoneNumber;
       return res.json(response);
     }
-
-    // INTERN users: Include internship duration and performance metrics
     response.user.internshipDuration = user.internshipDuration;
-
-    // Fetch work & progress data
     const tasks = await Task.find({ assignedTo: userId });
     const submissions = await Submission.find({ internId: userId });
     const attendance = await Attendance.find({ internId: userId });
-
     const completedTasks = submissions.filter(s => s.status === 'approved').length;
     const pendingTasks = tasks.length - submissions.length;
     const totalDays = attendance.length;
     const presentDays = attendance.filter(a => a.status === 'present' || a.status === 'late').length;
     const attendanceRate = totalDays > 0 ? ((presentDays / totalDays) * 100).toFixed(2) : '0.00';
     const completionRate = tasks.length > 0 ? ((completedTasks / tasks.length) * 100).toFixed(2) : '0.00';
-
-    // Calculate eligibility using centralized logic
     const eligibility = calculateEligibility(user, attendanceRate, completionRate, tasks.length, totalDays);
-
     response.workProgress = {
       totalTasks: tasks.length,
       completedTasks,
@@ -96,34 +72,22 @@ const getUserProfile = async (req, res) => {
       reasons: eligibility.reasons,
       criteria: eligibility.criteria
     };
-
     res.json(response);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
-
-// @desc    Update user profile
-// @route   PUT /api/profile/:userId
-// @access  Private
 const updateUserProfile = async (req, res) => {
   try {
     const { userId } = req.params;
     const requestingUser = req.user;
-
-    // Authorization: Users can only update their own profile
     if (requestingUser._id.toString() !== userId) {
       return res.status(403).json({ message: 'Access denied: You can only update your own profile' });
     }
-
     const { education, resumeUrl, companyName, phoneNumber } = req.body;
-
-    // Only allow updating specific fields
     const updateData = {};
     if (education !== undefined) updateData.education = education;
     if (resumeUrl !== undefined) updateData.resumeUrl = resumeUrl;
-    
-    // Admin-specific fields
     if (requestingUser.role === 'admin') {
       if (companyName !== undefined) updateData.companyName = companyName;
       if (phoneNumber !== undefined) {
@@ -133,23 +97,19 @@ const updateUserProfile = async (req, res) => {
         updateData.phoneNumber = phoneNumber;
       }
     }
-
     const user = await User.findByIdAndUpdate(
       userId,
       updateData,
       { new: true, runValidators: true }
     ).select('-password');
-
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
-
     res.json(user);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
-
 module.exports = {
   getUserProfile,
   updateUserProfile

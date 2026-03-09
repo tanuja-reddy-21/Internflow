@@ -3,13 +3,11 @@ import { useAuth } from '../context/AuthContext';
 import API from '../utils/api';
 import Navbar from '../components/Navbar';
 import './Dashboard.css';
-
 const TaskManagement = lazy(() => import('../components/Admin/TaskManagement'));
 const SubmissionReview = lazy(() => import('../components/Admin/SubmissionReview'));
 const InternPerformance = lazy(() => import('../components/Admin/InternPerformance'));
 const AdminAnalytics = lazy(() => import('../components/Admin/AdminAnalytics'));
 const InviteManagement = lazy(() => import('../components/Admin/InviteManagement'));
-
 const AdminDashboard = () => {
   const { user } = useAuth();
   const [stats, setStats] = useState({
@@ -20,44 +18,36 @@ const AdminDashboard = () => {
   });
   const [activeTab, setActiveTab] = useState('tasks');
   const [loading, setLoading] = useState(true);
-
   React.useEffect(() => {
     document.title = 'Admin Dashboard | InternFlow';
   }, []);
-
   useEffect(() => {
     fetchDashboardStats();
   }, []);
-
   const fetchDashboardStats = async () => {
     try {
       const [tasksRes, submissionsRes] = await Promise.all([
         API.get('/tasks'),
         API.get('/submissions')
       ]);
-
       const pendingCount = submissionsRes.data.filter(
         s => s.status === 'submitted'
       ).length;
-
       setStats({
-        totalInterns: 0, // Will be updated with user count API
+        totalInterns: 0, 
         totalTasks: tasksRes.data.length,
         pendingSubmissions: pendingCount,
         eligibleInterns: 0
       });
-
       setLoading(false);
     } catch (error) {
       console.error('Error fetching stats:', error);
       setLoading(false);
     }
   };
-
   if (loading) {
     return <div className="loading">Loading dashboard...</div>;
   }
-
   return (
     <div className="dashboard-wrapper">
       <Navbar />
@@ -66,7 +56,6 @@ const AdminDashboard = () => {
           <h1>Admin Dashboard</h1>
           <p className="subtitle">Manage Internship Program</p>
         </div>
-
         <div className="stats-grid">
           <div className="stat-card admin">
             <h3>Total Tasks</h3>
@@ -85,7 +74,6 @@ const AdminDashboard = () => {
             <p className="stat-number green">{stats.eligibleInterns}</p>
           </div>
         </div>
-
         <div className="admin-tabs">
           <button 
             className={activeTab === 'tasks' ? 'active' : ''}
@@ -118,7 +106,6 @@ const AdminDashboard = () => {
             🔐 Invites
           </button>
         </div>
-
         <div className="tab-content">
           <Suspense fallback={<div className="loading">Loading...</div>}>
             {activeTab === 'tasks' && <TaskManagement onUpdate={fetchDashboardStats} />}
@@ -132,5 +119,4 @@ const AdminDashboard = () => {
     </div>
   );
 };
-
 export default AdminDashboard;

@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import API from '../../utils/api';
 import '../Intern/Modal.css';
-
 const CreateTaskModal = ({ task, onClose, onSuccess }) => {
   const { user } = useAuth();
   const [formData, setFormData] = useState({
@@ -16,7 +15,6 @@ const CreateTaskModal = ({ task, onClose, onSuccess }) => {
   const [interns, setInterns] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-
   useEffect(() => {
     fetchInterns();
     if (task) {
@@ -30,7 +28,6 @@ const CreateTaskModal = ({ task, onClose, onSuccess }) => {
       });
     }
   }, [task]);
-
   const fetchInterns = async () => {
     try {
       const { data } = await API.get('/users/interns');
@@ -39,12 +36,10 @@ const CreateTaskModal = ({ task, onClose, onSuccess }) => {
       console.error('Error fetching interns:', error);
     }
   };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setLoading(true);
-
     try {
       if (task) {
         await API.put(`/tasks/${task._id}`, formData);
@@ -57,7 +52,6 @@ const CreateTaskModal = ({ task, onClose, onSuccess }) => {
       setLoading(false);
     }
   };
-
   const handleInternToggle = (internId) => {
     setFormData(prev => ({
       ...prev,
@@ -66,12 +60,10 @@ const CreateTaskModal = ({ task, onClose, onSuccess }) => {
         : [...prev.assignedTo, internId]
     }));
   };
-
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
-
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content large" onClick={(e) => e.stopPropagation()}>
@@ -79,9 +71,7 @@ const CreateTaskModal = ({ task, onClose, onSuccess }) => {
           <h2>{task ? 'Edit Task' : 'Create New Task'}</h2>
           <button className="close-btn" onClick={onClose}>×</button>
         </div>
-
         {error && <div className="error-message">{error}</div>}
-
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label>Task Title *</label>
@@ -94,7 +84,6 @@ const CreateTaskModal = ({ task, onClose, onSuccess }) => {
               required
             />
           </div>
-
           <div className="form-group">
             <label>Description *</label>
             <textarea
@@ -106,7 +95,6 @@ const CreateTaskModal = ({ task, onClose, onSuccess }) => {
               required
             />
           </div>
-
           <div className="form-row">
             <div className="form-group">
               <label>Domain (Auto-assigned)</label>
@@ -118,7 +106,6 @@ const CreateTaskModal = ({ task, onClose, onSuccess }) => {
               />
               <small style={{ color: '#6b7280', fontSize: '0.875rem' }}>Domain is locked to your assigned domain</small>
             </div>
-
             <div className="form-group">
               <label>Deadline *</label>
               <input
@@ -130,7 +117,6 @@ const CreateTaskModal = ({ task, onClose, onSuccess }) => {
               />
             </div>
           </div>
-
           <div className="form-row">
             <div className="form-group">
               <label>Priority *</label>
@@ -145,7 +131,6 @@ const CreateTaskModal = ({ task, onClose, onSuccess }) => {
               </select>
             </div>
           </div>
-
           <div className="form-group">
             <label>Assign to Interns</label>
             <div className="intern-selection">
@@ -165,7 +150,6 @@ const CreateTaskModal = ({ task, onClose, onSuccess }) => {
               )}
             </div>
           </div>
-
           <div className="modal-actions">
             <button type="button" className="btn-secondary" onClick={onClose}>
               Cancel
@@ -179,5 +163,4 @@ const CreateTaskModal = ({ task, onClose, onSuccess }) => {
     </div>
   );
 };
-
 export default CreateTaskModal;

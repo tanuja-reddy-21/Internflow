@@ -1,15 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import API from '../../utils/api';
 import './PerformanceCard.css';
-
 const PerformanceCard = ({ userId }) => {
   const [performance, setPerformance] = useState(null);
   const [loading, setLoading] = useState(true);
-
   useEffect(() => {
     fetchPerformance();
   }, [userId]);
-
   const fetchPerformance = async () => {
     try {
       const { data } = await API.get(`/performance/${userId}`);
@@ -20,14 +17,11 @@ const PerformanceCard = ({ userId }) => {
       setLoading(false);
     }
   };
-
   if (loading) return <div>Loading performance...</div>;
   if (!performance) return null;
-
   return (
     <div className="performance-card">
       <h2>Performance Overview</h2>
-
       <div className="performance-metrics">
         <div className="metric">
           <div className="metric-label">Task Completion</div>
@@ -39,7 +33,6 @@ const PerformanceCard = ({ userId }) => {
             />
           </div>
         </div>
-
         <div className="metric">
           <div className="metric-label">Attendance Rate</div>
           <div className="metric-value">{performance.attendanceRate}%</div>
@@ -51,7 +44,6 @@ const PerformanceCard = ({ userId }) => {
           </div>
         </div>
       </div>
-
       <div className={`eligibility-status ${performance.isEligible ? 'eligible' : 'not-eligible'}`}>
         {performance.isEligible ? (
           <>
@@ -65,7 +57,6 @@ const PerformanceCard = ({ userId }) => {
           </>
         )}
       </div>
-
       <div className="performance-stats">
         <div className="stat-item">
           <span>Completed Tasks</span>
@@ -79,5 +70,4 @@ const PerformanceCard = ({ userId }) => {
     </div>
   );
 };
-
 export default PerformanceCard;

@@ -1,18 +1,12 @@
 const axios = require('axios');
-
-const BASE_URL = 'http://localhost:5000/api';
-
+const BASE_URL = 'http:
 async function testBackend() {
   console.log('🧪 Testing InternFlow Backend...\n');
-
   try {
-    // Test 1: Server Health
     console.log('1️⃣ Testing server health...');
-    const health = await axios.get('http://localhost:5000');
+    const health = await axios.get('http:
     console.log('✅ Server is running:', health.data.message);
     console.log();
-
-    // Test 2: Register Admin
     console.log('2️⃣ Testing admin registration...');
     try {
       const adminReg = await axios.post(`${BASE_URL}/auth/register`, {
@@ -32,8 +26,6 @@ async function testBackend() {
         throw error;
       }
     }
-
-    // Test 3: Register Intern
     console.log('3️⃣ Testing intern registration...');
     const internEmail = `intern${Date.now()}@test.com`;
     const internReg = await axios.post(`${BASE_URL}/auth/register`, {
@@ -48,8 +40,6 @@ async function testBackend() {
     const internToken = internReg.data.token;
     console.log('   Token:', internToken.substring(0, 20) + '...');
     console.log();
-
-    // Test 4: Login
     console.log('4️⃣ Testing login...');
     const login = await axios.post(`${BASE_URL}/auth/login`, {
       email: internEmail,
@@ -59,8 +49,6 @@ async function testBackend() {
     console.log('   User:', login.data.user.fullName);
     console.log('   Role:', login.data.user.role);
     console.log();
-
-    // Test 5: Get Current User
     console.log('5️⃣ Testing protected route (Get Me)...');
     const me = await axios.get(`${BASE_URL}/auth/me`, {
       headers: { Authorization: `Bearer ${internToken}` }
@@ -69,8 +57,6 @@ async function testBackend() {
     console.log('   User:', me.data.fullName);
     console.log('   Email:', me.data.email);
     console.log();
-
-    // Test 6: Get Tasks
     console.log('6️⃣ Testing tasks endpoint...');
     const tasks = await axios.get(`${BASE_URL}/tasks`, {
       headers: { Authorization: `Bearer ${internToken}` }
@@ -78,9 +64,7 @@ async function testBackend() {
     console.log('✅ Tasks endpoint working');
     console.log('   Tasks found:', tasks.data.length);
     console.log();
-
     console.log('🎉 All tests passed! Backend is fully functional.\n');
-    
   } catch (error) {
     console.error('❌ Test failed:');
     if (error.response) {
@@ -95,6 +79,4 @@ async function testBackend() {
     process.exit(1);
   }
 }
-
-// Run tests
 testBackend();

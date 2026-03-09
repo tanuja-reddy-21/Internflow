@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import './Auth.css';
-
 const Register = () => {
   const [formData, setFormData] = useState({
     fullName: '',
@@ -17,44 +16,33 @@ const Register = () => {
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-
   const { register } = useAuth();
   const navigate = useNavigate();
-
   React.useEffect(() => {
     document.title = 'Register – InternFlow';
   }, []);
-
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-
-    // Validation
     if (!formData.fullName.trim()) {
       setError('Full name is required');
       return;
     }
-
     if (!formData.email.trim()) {
       setError('Email is required');
       return;
     }
-
     if (formData.password.length < 6) {
       setError('Password must be at least 6 characters');
       return;
     }
-
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match');
       return;
     }
-
-    // Admin-specific validation
     if (formData.role === 'admin') {
       if (!formData.companyName.trim()) {
         setError('Company Name is required for admin registration');
@@ -69,9 +57,7 @@ const Register = () => {
         return;
       }
     }
-
     setLoading(true);
-
     try {
       const payload = {
         fullName: formData.fullName,
@@ -80,17 +66,13 @@ const Register = () => {
         role: formData.role,
         domain: formData.domain
       };
-
-      // Role-specific fields
       if (formData.role === 'admin') {
         payload.companyName = formData.companyName;
         payload.phoneNumber = formData.phoneNumber;
       } else {
         payload.internshipDuration = parseInt(formData.internshipDuration);
       }
-
       const result = await register(payload);
-
       if (result.success) {
         const redirectPath = formData.role === 'admin' ? '/admin/dashboard' : '/intern/dashboard';
         navigate(redirectPath);
@@ -104,13 +86,11 @@ const Register = () => {
       setLoading(false);
     }
   };
-
   return (
     <div className="auth-container">
       <div className="auth-card">
         <h2>Register</h2>
         {error && <div className="error-message">{error}</div>}
-        
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label>Full Name *</label>
@@ -123,7 +103,6 @@ const Register = () => {
               placeholder="Enter your full name"
             />
           </div>
-
           <div className="form-group">
             <label>Email *</label>
             <input
@@ -135,7 +114,6 @@ const Register = () => {
               placeholder="Enter your email"
             />
           </div>
-
           <div className="form-group">
             <label>Role *</label>
             <select
@@ -148,7 +126,6 @@ const Register = () => {
               <option value="admin">Admin</option>
             </select>
           </div>
-
           <div className="form-group">
             <label>Domain *</label>
             <select
@@ -168,7 +145,6 @@ const Register = () => {
               <option value="Backend Development">Backend Development</option>
             </select>
           </div>
-
           {formData.role === 'admin' && (
             <>
               <div className="form-group">
@@ -182,7 +158,6 @@ const Register = () => {
                   placeholder="Enter company name"
                 />
               </div>
-
               <div className="form-group">
                 <label>Phone Number *</label>
                 <input
@@ -197,7 +172,6 @@ const Register = () => {
               </div>
             </>
           )}
-
           {formData.role !== 'admin' && (
             <div className="form-group">
               <label>Internship Duration *</label>
@@ -213,7 +187,6 @@ const Register = () => {
               </select>
             </div>
           )}
-
           <div className="form-group">
             <label>Password *</label>
             <input
@@ -226,7 +199,6 @@ const Register = () => {
               minLength="6"
             />
           </div>
-
           <div className="form-group">
             <label>Confirm Password *</label>
             <input
@@ -238,12 +210,10 @@ const Register = () => {
               placeholder="Confirm password"
             />
           </div>
-
           <button type="submit" className="btn-primary" disabled={loading}>
             {loading ? 'Registering...' : 'Register'}
           </button>
         </form>
-
         <p className="auth-link">
           Already have an account? <Link to="/login">Login here</Link>
         </p>
@@ -251,5 +221,4 @@ const Register = () => {
     </div>
   );
 };
-
 export default Register;
